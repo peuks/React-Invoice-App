@@ -22,11 +22,6 @@ class Customer
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $firstname;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
     private $firstName;
 
     /**
@@ -49,6 +44,11 @@ class Customer
      */
     private $invoices;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="customer")
+     */
+    private $user;
+
     public function __construct()
     {
         $this->invoices = new ArrayCollection();
@@ -59,14 +59,14 @@ class Customer
         return $this->id;
     }
 
-    public function getFirstname(): ?string
+    public function getFirstName(): ?string
     {
-        return $this->firstname;
+        return $this->firstName;
     }
 
-    public function setFirstname(string $firstname): self
+    public function setFirstname(string $firstName): self
     {
-        $this->firstname = $firstname;
+        $this->firstName = $firstName;
 
         return $this;
     }
@@ -133,6 +133,18 @@ class Customer
                 $invoice->setCustomer(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
