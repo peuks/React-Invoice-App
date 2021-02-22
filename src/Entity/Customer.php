@@ -2,56 +2,113 @@
 
 namespace App\Entity;
 
-use App\Repository\CustomerRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CustomerRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ORM\Entity(repositoryClass=CustomerRepository::class)
+ * @ApiResource(
+ *  collectionOperations={"GET"={"path"="/customers"},"POST"},
+ *  itemOperations={"GET"={"path"="/customers/{id}"},"PUT","DELETE"},
+ *  subresourceOperations={
+ *      "invoices_get_subresource"={
+ *          "path"="/customers/{id}/invoices"
+ *      }
+ *  },
+ *  normalizationContext={
+ *      "groups"={"customers_read"}
+ *  } 
+ * )
+ * @ApiFilter(SearchFilter::class,properties={"firstName":"partial","lastName":"partial","company":"partial"})
+ * @ApiFilter(OrderFilter::class)
+ * 
  */
 class Customer
 {
     /**
-     * @ORM\Id
+     * @ORM\Id 
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"customers_read","invoices_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"customers_read","invoices_read"})
      */
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"customers_read","invoices_read"})
      */
     private $lastName;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"customers_read","invoices_read"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"customers_read","invoices_read"})
      */
     private $company;
 
     /**
      * @ORM\OneToMany(targetEntity=Invoice::class, mappedBy="customer")
+     * @Groups({"customers_read"})
+     * @ApiSubresource
      */
     private $invoices;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="customer")
+     * @Groups({"customers_read"})
      */
     private $user;
 
     public function __construct()
     {
         $this->invoices = new ArrayCollection();
+    }
+
+    /**
+     * Will return the total amount of invoices
+     * @Groups({"customers_read"}) 
+     * 
+     * @return float
+     */
+    public function getTotalAmount(): float
+    {
+        // Transform arraycollection to array
+        return array_reduce($this->invoices->toArray(), function ($total, $invoce) {
+            return $total + $invoce->getAmount();
+        }, 0);
+    }
+
+    /**
+     * Return the total amount of unpaid invoices
+     * @Groups({"customers_read"}) 
+     * @return float
+     */
+    public function getTotalUnpaid(): float
+    {
+        // Transform arraycollection to array
+        return array_reduce($this->invoices->toArray(), function ($total, $invoce) {
+            // Get total of invoices unpaid
+            return $total + ($invoce->getStatus() === "PAID" || $invoce->getStatus() === "CANCELLED") ? 0 : $invoce->getAmount();
+        }, 0);
     }
 
     public function getId(): ?int

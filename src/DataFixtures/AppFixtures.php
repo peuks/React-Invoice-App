@@ -25,7 +25,7 @@ class AppFixtures extends Fixture
         /**
          * Création des Users
          */
-        for ($i = 0; $i < mt_rand(1, 10); $i++) {
+        for ($i = 0; $i < mt_rand(20, 20); $i++) {
             /** @var User */
             $user = new User();
             $user->setFirstName($this->faker->firstName)
@@ -37,7 +37,7 @@ class AppFixtures extends Fixture
             /**
              * Création des Clients
              */
-            for ($i = 0; $i < mt_rand(20, 50); $i++) {
+            for ($i = 0; $i < mt_rand(1, 50); $i++) {
                 $customer = new Customer;
                 $customer->setFirstName($this->faker->firstName())
                     ->setLastName($this->faker->lastName)
@@ -50,7 +50,7 @@ class AppFixtures extends Fixture
                 /**
                  * Création des factures
                  */
-                for ($i = 0; $i < mt_rand(0, 50); $i++) {
+                for ($i = 0; $i < mt_rand(2, 50); $i++) {
                     $invoce = new Invoice;
                     $invoce
                         ->setAmount($this->faker->randomFloat(2, 53, 5000))
