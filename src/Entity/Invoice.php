@@ -83,7 +83,7 @@ class Invoice
      */
     private $customer;
 
-    /**V
+    /**
      * @ORM\Column(type="integer")
      * @Groups({"invoices_read","customers_read","invoices_subresource"})
      * @Assert\NotBlank(message="Il faut définir un chrono")
@@ -115,6 +115,10 @@ class Invoice
         return $this->amount;
     }
 
+    /**
+     * Pour éviter l'erreur json, il faut autoriser n'importe quelle type de valeur.
+     * La validation pourra ainsi être faite via les annotations.
+     */
     public function setAmount($amount): self
     {
         $this->amount = $amount;
