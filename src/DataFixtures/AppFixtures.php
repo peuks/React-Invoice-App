@@ -29,9 +29,9 @@ class AppFixtures extends Fixture
             /** @var User */
             $user = new User();
             $user->setFirstName($this->faker->firstName)
-                ->setLastName($this->faker->lastName)
                 ->setEmail($this->faker->email)
-                ->setPassword($this->encoder->encodePassword($user, 'password'));
+                ->setPassword($this->encoder->encodePassword($user, 'password'))
+                ->setLastName($this->faker->lastName);
             $manager->persist($user);
 
             /**
