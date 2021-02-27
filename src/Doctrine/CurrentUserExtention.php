@@ -38,7 +38,8 @@ class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryIt
         /**
          * Si l'on demande des invoices ou des customers alors agir sur la requee pour qu'elle tienne compte de l'utilisateur
          */
-        if ($resourceClass === (Customer::class  || Invoice::class)) {
+
+        if ($resourceClass === Customer::class || $resourceClass === Invoice::class) {
             dd($queryBuilder);
         }
     }
