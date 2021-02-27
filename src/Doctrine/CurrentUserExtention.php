@@ -36,18 +36,15 @@ class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryIt
         $user =  $this->security->getUser();
 
         /**
-         * Si l'on demande des invoices ou des customers alors agir sur 
-         * la requee pour qu'elle tienne compte de l'utilisateur
+         * Si l'on demande des invoices ou des customers alors agir sur la requee pour qu'elle tienne compte de l'utilisateur
          */
         if ($resourceClass === (Customer::class  || Invoice::class)) {
-
             dd($queryBuilder);
         }
     }
 
 
     /**
-     * Undocumented function
      *
      * @param QueryBuilder $queryBuilder
      * @param QueryNameGeneratorInterface $queryNameGenerator
@@ -59,6 +56,5 @@ class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryIt
      */
     public function applyToItem(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, array $identifiers, ?string $operationName = null, array $context = [])
     {
-        dd($queryBuilder);
     }
 }
