@@ -730,7 +730,7 @@ et dans CurrentUserExtension.php
 if (
             // Checker qu'on a la bonne ressource
             ($resourceClass === Customer::class || $resourceClass === Invoice::class)
-            // Que l'utilisateur à un Rôle Admin
+            // Que l'utilisateur *à un Rôle Admin
             && !$this->auth->isGranted('ROLE_ADMIN')
             // Qu'il est connecté ( si pas connecté $user renvoie null )
             && $user instanceof User
@@ -738,3 +738,237 @@ if (
         // Le reste du code ici
       }
 ```
+
+## Création de la page d'accueil de notre site qui portera l'application React
+
+Il faut créer un controller AppController et définir la route en /
+
+Pour que le refresh automatique de webpack puisse fonctionner il faut modifier le port de dev-server dans package.json en 8080
+
+```json
+{
+  "devDependencies": {
+    "@symfony/stimulus-bridge": "^2.0.0",
+    "@symfony/webpack-encore": "^1.0.0",
+    "core-js": "^3.0.0",
+    "regenerator-runtime": "^0.13.2",
+    "sass": "^1.32.8",
+    "sass-loader": "^11.0.0",
+    "stimulus": "^2.0.0",
+    "webpack-notifier": "^1.6.0"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev-server": "encore dev-server --port 8080",
+    "dev": "encore dev",
+    "watch": "encore dev --watch",
+    "build": "encore production --progress"
+  }
+}
+```
+
+En fonction de notre configuration il faudra accéder au projet via localhost:8000 ou 127.0.0.1:8000
+
+## Installation de React et des dépendances
+
+```
+    yarn add @babel/preset-react@^7.0.0 --dev
+```
+
+r
+Activer react dans webpack.config.js
+
+```js
+  .enableReactPreset();
+```
+
+et dans app.js
+
+```js
+/*
+ * Welcome to your app's main JavaScript file!
+ *
+ * We recommend including the built version of this JavaScript file
+ * (and its CSS file) in your base layout (base.html.twig).
+ */
+
+//  Import React
+
+import React from "react";
+import ReactDom from "react-dom";
+
+// any CSS you import will output into a single css file (app.css in this case)
+import "./styles/app.scss";
+
+// start the Stimulus application
+import "./bootstrap";
+console.log("Wesh ma gueule");
+
+// Module <App />
+const App = () => {
+  return <h1>Bonjour à tous </h1>;
+};
+
+// Définir notre root Element
+const rootElement = document.querySelector("#app");
+
+// Demander à react de générer le composant < APP /> dans rootElement
+
+ReactDom.render(<App />, rootElement);
+```
+
+## Création de la page d'accueil et de la barre de navigation
+
+créer NavBar.jsx
+
+class="" devient className et input, hr doit être fermé ! ( à l'inverse de html5) <input></input>
+
+```jsx
+/*
+ * Welcome to your app's main JavaScript file!
+ *
+ * We recommend including the built version of this JavaScript file
+ * (and its CSS file) in your base layout (base.html.twig).
+ */
+
+//  Import React
+
+import React from "react";
+import ReactDom from "react-dom";
+
+// any CSS you import will output into a single css file (app.css in this case)
+import "../styles/app.scss";
+
+// start the Stimulus application
+import "../bootstrap";
+import Navbar from "./components/NavBar";
+import HomePage from "./pages/HomePage";
+
+// Module <App />
+const App = () => {
+  return (
+    <>
+      <Navbar />
+      <div className="container pt-5">
+        <HomePage />
+      </div>
+    </>
+  );
+};
+
+// Définir notre root Element
+const rootElement = document.querySelector("#app");
+
+// Demander à react de générer le composant < APP /> dans rootElement
+
+ReactDom.render(<App />, rootElement);
+```
+
+## Mise en place du routage avec React Router Dom
+
+Il faut importer certaines choses
+
+HashRouter permet de faire des routes qui commencent par # eg : #/customers
+
+Switch permet d'afficher le bon composant en fonction de la route
+
+Le composant Route permet de faire la correspondance entre une URL ( route ) et un composant / affichage
+
+```jsx
+/*
+ * Welcome to your app's main JavaScript file!
+ *
+ * We recommend including the built version of this JavaScript file
+ * (and its CSS file) in your base layout (base.html.twig).
+ */
+
+//  Import React
+
+import React from "react";
+import ReactDom from "react-dom";
+import { HashRouter, Switch, Route } from "react-router-dom";
+
+// any CSS you import will output into a single css file (app.css in this case)
+import "../styles/app.scss";
+
+// start the Stimulus application
+import "../bootstrap";
+import Navbar from "./components/NavBar";
+import HomePage from "./pages/HomePage";
+import CustomersPage from "./pages/CustomersPage";
+
+// Module <App />
+const App = () => {
+  return (
+    <HashRouter>
+      <Navbar />
+      <main className="container pt-5">
+        <Switch>
+          <Route path="/customers" component={CustomersPage} />
+          <Route path="/" component={HomePage} />
+        </Switch>
+      </main>
+    </HashRouter>
+  );
+};
+
+// Définir notre root Element
+const rootElement = document.querySelector("#app");
+
+// Demander à react de générer le composant < APP /> dans rootElement
+
+ReactDom.render(<App />, rootElement);
+```
+
+A noter que la route la plus précise doit être précisée en premier !
+
+## Création de la page de liste des Customers
+
+```jsx
+import React from "react";
+const CustomersPage = (props) => {
+  return (
+    <>
+      <h1>Liste des clients</h1>
+      <table className="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Email</th>
+            <th>Entreprise</th>
+            <th className="text-center">Factures</th>
+            <th className="text-center">Montant total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>18</td>
+            <td>
+              <a href="">David Vanmak</a>
+            </td>
+            <td>vanmakdavid@gmail.com</td>
+            <td>Apollo-Immo</td>
+            <td className="text-center">
+              <span className="badge badge-primary ">4</span>
+            </td>
+            <td className="text-center">2 400,00 €</td>
+            <td>
+              <button className="btn btn-sm btn-danger">Supprimer</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </>
+  );
+};
+
+export default CustomersPage;
+```
+
+## Appel HTTP vers notre API pour récupérer les Customers
+
+Quand on charge le composant CustomerPage.jsx ( la page des Customers) on veut qu'il se passe un effet
+On va utiliser le Hook useEffect()
