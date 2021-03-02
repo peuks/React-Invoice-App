@@ -34,8 +34,8 @@ Définir perPage pour des entités
 ## Normalisation et Sérialisation
 
 **Normalisation**
-  
- Passage d'objet PHP en Array classique.
+
+Passage d'objet PHP en Array classique.
 
 **Sérialisation**
 
@@ -116,10 +116,11 @@ dans config/routes.yaml
 
 ```yaml
 api_login_check:
-   path: /api/login_check
+  path: /api/login_check
 ```
 
 dans security.yaml
+
 ```
 security:
   encoders:
@@ -177,6 +178,7 @@ registration:
     stateless: true
     anonymous: true
 ```
+
 Sécuriser la registration
 
 ```yaml
@@ -233,10 +235,9 @@ security:
   access_control:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
-
 ```
 
-Configuration finale 
+Configuration finale
 
 ```yaml
 security:
@@ -307,13 +308,12 @@ security:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
-
 ```
+
 ## ApiPlatform #06 - Intervenir aux moments clés grâce aux événements du Kernel
 
 **3 types d'évenement**
 ![2 contextes possibles](memo_3.jpg)
-
 
 ### Intervenir sur la création d'un User pour hasher le mot de passe
 
@@ -354,9 +354,9 @@ class PasswordEncoderSubscriber implements EventSubscriberInterface
     {
         /**
          * Liste des méthodes que l'on veut brancher à des évènements.
-         * On appelle la fonction encodePassword avant l'évènement 
+         * On appelle la fonction encodePassword avant l'évènement
          * d'enrengistrement de la donnée
-         * 
+         *
          */
         return [KernelEvents::VIEW => ['encodePassword', EventPriorities::PRE_WRITE]];
     }
@@ -391,6 +391,7 @@ class PasswordEncoderSubscriber implements EventSubscriberInterface
 }
 
 ```
+
 ## Intervenir sur la création d'un Customer pour le lier à l'utilisateur courant
 
 ```php
@@ -423,9 +424,9 @@ class CustomerUserSubscriber implements EventSubscriberInterface
     {
         /**
          * Liste des méthodes que l'on veut brancher à des évènements.
-         * On appelle la fonction setUserCustomer avant l'évènement 
+         * On appelle la fonction setUserCustomer avant l'évènement
          * de validation des données
-         * 
+         *
          */
         return [KernelEvents::VIEW => ['setUserForCustomer', EventPriorities::PRE_VALIDATE]];
     }
@@ -434,8 +435,8 @@ class CustomerUserSubscriber implements EventSubscriberInterface
     {
         /**
          * Récupérer le résultat du controller
-         * Dans notre cas il s'agit dun 
-   
+         * Dans notre cas il s'agit dun
+
          */
         $customer =  $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
@@ -443,7 +444,7 @@ class CustomerUserSubscriber implements EventSubscriberInterface
         if ($customer instanceof Customer && $method === "POST") {
 
             /**
-             * Récupére l'utilisateur actuel 
+             * Récupére l'utilisateur actuel
              */
             $user = $this->security->getUser();
 
@@ -493,7 +494,7 @@ class InvoiceChronoIncrement implements EventSubscriberInterface
     {
         /**
          * Liste des méthodes que l'on veut brancher à des évènements.
-         * On appelle la fonction setUserCustomer avant l'évènement 
+         * On appelle la fonction setUserCustomer avant l'évènement
          * de validation des données
          * Pour passer la validation, l'incrémentation doit être définie.
          */
@@ -506,7 +507,7 @@ class InvoiceChronoIncrement implements EventSubscriberInterface
          * Récupérer le résultat du controller
          * Dans notre cas il s'agit d'un Invoice
          * Dans mon invoice je n'ai pas le chrono mais j'ai le customer en question !
-         * @var Invoice 
+         * @var Invoice
          */
 
         $invoice =  $event->getControllerResult();
@@ -515,7 +516,7 @@ class InvoiceChronoIncrement implements EventSubscriberInterface
         /**
          * * Si l'on récupère une instance Invoice en Post alors
          * * Récupérer l'utilisateur
-         * * Récupérer le chrono de la dernière facture du customer en cours 
+         * * Récupérer le chrono de la dernière facture du customer en cours
          *  ( il est renseigné dans l'instance invoice)
          * * Définir le chrono
          */
@@ -542,9 +543,7 @@ Décodée , le JWT nous renvoie un Json avec certaines infos
 {
   "iat": 1614344711,
   "exp": 1614348311,
-  "roles": [
-    "ROLE_USER"
-  ],
+  "roles": ["ROLE_USER"],
   "username": "lucas.michele@guilbert.fr"
 }
 ```
@@ -590,7 +589,6 @@ services:
         }
   # add more service definitions when explicit configuration is needed
   # please note that last definitions always *replace* previous ones
-
 ```
 
 ```php
@@ -604,24 +602,24 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 class JwtCreatedSubscriber
 {
     /**
-     * La fonction est appellé automatiquement lors d'un évènement de création de token 
+     * La fonction est appellé automatiquement lors d'un évènement de création de token
      * pour nous permettre sa modification ou non
      */
     public function updateJwtData(JWTCreatedEvent $event)
     {
         /**
          * $event->getData()
-         * 
+         *
          * Il est possible de travailler sur les datas d'un événement
          * Dans ce cas on récupère le PAYLOAD, c'est à dire les données
          * qui sont dans le token. Ces données sont modifiables.
-         * 
+         *
          * On a donc un utilisateur mais on veut renseigner plus de valeur.
          * Par défaut on a un tableau avec le ROLE et userName en clée / valeur.
          * On voudrait rajouter dans le tableau firstName et lastName
-         * 
-         * Note : La clef est définit par le dev tandis que la valeur est obtenue 
-         *        via les méthodes de la Class User ( dans notre cas ) 
+         *
+         * Note : La clef est définit par le dev tandis que la valeur est obtenue
+         *        via les méthodes de la Class User ( dans notre cas )
          */
 
         /**
@@ -645,8 +643,92 @@ class JwtCreatedSubscriber
 A la création des entités, on a crée des events pour les modifier et intégrer
 les informations manquantes ( l'utilisateur, la date ... )
 
-Lorsqu'il s'agit d'afficher les facture. l'API renvoie toutes les factures ! Pas seulement ceux de l'utilisateur connecté ! 
+Lorsqu'il s'agit d'afficher les facture. l'API renvoie toutes les factures ! Pas seulement ceux de l'utilisateur connecté !
 
 Il faudra modifier la modifier la requête en cours pour prendre en compte l'utiliseur connecté.
 
-mkdir /src/Doctrine
+```php
+<?php
+// src/Doctrine/CurrentUserExtension.php
+namespace App\Doctrine;
+
+use App\Entity\Customer;
+use Doctrine\ORM\QueryBuilder;
+use Symfony\Component\Security\Core\Security;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryItemExtensionInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
+use App\Entity\Invoice;
+
+class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
+{
+    protected $security;
+
+    public function __construct(Security $security)
+    {
+        $this->security = $security;
+    }
+
+
+    /**
+     * Doctrine peut effectuer des requêtes pou récupérer des collections
+     * Il se rend compte que l'on a une extension et appliquer des coorectifs | ameiliorations
+     *
+     * @param QueryBuilder $queryBuilder il s'agit de la requête Doctrine
+     * @param QueryNameGeneratorInterface $queryNameGenerator
+     * @param string $resourceClass Le nom de la class sur laquelle on est entrain de faire des requêtes ( ex : la liste des invoices -> la class Invoice)
+     * @param string|null $operationName
+     * @return void
+     */
+    public function applyToCollection(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?string $operationName = null)
+    {
+        // Obtenir l'utilisateur connecté
+        $user =  $this->security->getUser();
+
+        /**
+         * Si l'on demande des invoices ou des customers alors agir sur la requête
+         * pour qu'elle tienne compte de l'utilisateur
+         */
+        // $rootAlias = $queryBuilder->
+
+        if ($resourceClass === Customer::class || $resourceClass === Invoice::class) {
+}
+    }
+
+
+    /**
+     *
+     * @param QueryBuilder $queryBuilder
+     * @param QueryNameGeneratorInterface $queryNameGenerator
+     * @param string $resourceClass
+     * @param array $identifiers
+     * @param string|null $operationName
+     * @param array $context
+     * @return void
+     */
+    public function applyToItem(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, array $identifiers, ?string $operationName = null, array $context = [])
+    {
+    }
+}
+
+```
+
+## Extension de Doctrine : ajout du cas d'utilisateurs non connectés
+
+Je veux que les Customers soient accessibles aux gens qui ne sont pas connectés.
+
+Dans security.yaml nous avons
+
+```yaml
+access_control:
+  - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+  - { path: ^/api/customers, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+```
+
+et dans CurrentUserExtension.php
+
+```php
+if ($resourceClass === Customer::class || $resourceClass === Invoice::class && !$this->auth->isGranted('ROLE_ADMIN')) {
+
+}
+```

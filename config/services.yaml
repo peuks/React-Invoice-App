@@ -34,6 +34,10 @@ services:
           event: lexik_jwt_authentication.on_jwt_created,
           method: updateJwtData,
         }
+  # App\Doctrine\CurrentUserExtension:
+  #   tags:
+  #     - { name: api_platform.doctrine.orm.query_extension.collection }
+  #     - { name: api_platform.doctrine.orm.query_extension.item }
   # Création d'un nouveau service App\Events\JwtCreatedSubscriber
   # Ce service fait partie des eventListener du kernel
   # On l'appelle sur l'événement  lexik_jwt_authentication
