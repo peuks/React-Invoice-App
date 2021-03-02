@@ -721,14 +721,20 @@ Dans security.yaml nous avons
 
 ```yaml
 access_control:
-  - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
   - { path: ^/api/customers, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 ```
 
 et dans CurrentUserExtension.php
 
 ```php
-if ($resourceClass === Customer::class || $resourceClass === Invoice::class && !$this->auth->isGranted('ROLE_ADMIN')) {
-
-}
+if (
+            // Checker qu'on a la bonne ressource
+            ($resourceClass === Customer::class || $resourceClass === Invoice::class)
+            // Que l'utilisateur à un Rôle Admin
+            && !$this->auth->isGranted('ROLE_ADMIN')
+            // Qu'il est connecté ( si pas connecté $user renvoie null )
+            && $user instanceof User
+    ) {
+        // Le reste du code ici
+      }
 ```
