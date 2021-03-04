@@ -1,11 +1,23 @@
 import React from "react";
-//  <Pagination
-//         currentPage={currentPage}
-//         itemsPerPage={itemsPerPage}
-//         length={customers.length}
-//         onPagechanged={handlePageChange}
-//       />
-const Pagination = ({ currentPage, itemPerPage, length, onPageChanged }) => {
+{
+  /* <Pagination
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        length={cutomers.length}
+        onPageChanged={handlePageChange}
+      /> */
+}
+const Pagination = ({ currentPage, itemsPerPage, length, onPageChanged }) => {
+  // Arrondir à l'entier supérieur
+  const pageCount = Math.ceil(length / itemsPerPage);
+
+  // Tableau pour la boucle for avec map ( des nombre de pages de la pagination)
+  const pages = [];
+  //   console.log(pages);
+
+  for (let index = 1; index < pageCount; index++) {
+    pages.push(index);
+  }
   return (
     <div>
       <ul className="pagination pagination-sm">
@@ -13,7 +25,7 @@ const Pagination = ({ currentPage, itemPerPage, length, onPageChanged }) => {
           <button
             className="page-link"
             onClick={() => {
-              handleCangePage(currentPage - 1);
+              onPageChanged(currentPage - 1);
             }}
           >
             &laquo;
@@ -28,7 +40,7 @@ const Pagination = ({ currentPage, itemPerPage, length, onPageChanged }) => {
             <button
               className="page-link"
               onClick={() => {
-                handleCangePage(page);
+                onPageChanged(page);
               }}
             >
               {page}
@@ -39,7 +51,7 @@ const Pagination = ({ currentPage, itemPerPage, length, onPageChanged }) => {
           <button
             className="page-link"
             onClick={() => {
-              handleCangePage(currentPage + 1);
+              onPageChanged(currentPage + 1);
             }}
           >
             &raquo;
@@ -49,5 +61,13 @@ const Pagination = ({ currentPage, itemPerPage, length, onPageChanged }) => {
     </div>
   );
 };
+// Ajouter une fonction à l'objet Pagination
+Pagination.getData = (items, currentPage, itemsPerPage) => {
+  // Calculer le start
 
+  // D'ou on part(start ) et combien ( itemsPerPage )
+  const start = currentPage * itemsPerPage - itemsPerPage;
+
+  return items.slice(start, start + itemsPerPage);
+};
 export default Pagination;

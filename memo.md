@@ -1424,9 +1424,343 @@ Dans une pagination on a besoin de currentPage, itemPerPage etla longueur pour c
 On utilise aussi très souvent handlePageChange, on peut donc le passer en paramètre
 
 ```jsx
-<Pagination
-  currentPage={currentPage}
-  itemsPerPage={itemsPerPage}
-  length={customers.length}
-/>
+import React from "react";
+{
+  /* <Pagination
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        length={cutomers.length}
+        onPageChanged={handlePageChange}
+      /> */
+}
+const Pagination = ({ currentPage, itemsPerPage, length, onPageChanged }) => {
+  // Arrondir à l'entier supérieur
+  const pageCount = Math.ceil(length / itemsPerPage);
+
+  // Tableau pour la boucle for avec map ( des nombre de pages de la pagination)
+  const pages = [];
+  console.log(pages);
+
+  for (let index = 1; index < pageCount; index++) {
+    pages.push(index);
+  }
+  return (
+    <div>
+      <ul className="pagination pagination-sm">
+        <li className={`page-item ${currentPage === 1 && "disabled"}`}>
+          <button
+            className="page-link"
+            onClick={() => {
+              onPageChanged(currentPage - 1);
+            }}
+          >
+            &laquo;
+          </button>
+        </li>
+        {pages.map((page) => (
+          <li
+            key={page}
+            // Renvoyer la valeur après le && si la condition est vraie
+            className={`page-item  ` + (currentPage === page && "active")}
+          >
+            <button
+              className="page-link"
+              onClick={() => {
+                onPageChanged(page);
+              }}
+            >
+              {page}
+            </button>
+          </li>
+        ))}
+        <li className={`page-item ${currentPage === pageCount && "disabled"}`}>
+          <button
+            className="page-link"
+            onClick={() => {
+              onPageChanged(currentPage + 1);
+            }}
+          >
+            &raquo;
+          </button>
+        </li>
+      </ul>
+    </div>
+  );
+};
+// Ajouter une fonction à l'objet Pagination
+Pagination.getData = (items, currentPage, itemsPerPage) => {
+  // Calculer le start
+
+  // D'ou on part(start ) et combien ( itemsPerPage )
+  const start = currentPage * itemsPerPage - itemsPerPage;
+
+  return items.slice(start, start + itemsPerPage);
+};
+export default Pagination;
+```
+
+```jsx
+import React, { useEffect, useState } from "react";
+// Permet de faire des requêtes http
+import axios from "axios";
+import Pagination from "../components/Pagination";
+
+const CustomersPage = (props) => {
+  /**
+   * Le state se définit par customers avec sa méthode
+   * setCustomer qui permet de modifier la variable customers
+   */
+  const [customers, setCustomers] = useState([]);
+
+  // currentPage est un stage dont la page par défaut est définit à 1
+  const [currentPage, setCurrentPage] = useState(1);
+
+  /**
+   * Créatioin de l'effet, le deuxième paramètre [] contient la variable à surveiller
+   * pour lancer une effect à chaque fois qu'une variable change.
+   * On ne surveille pas de variable . On donne une variable vide.
+   * La fonction se lancera qu'une seule fois juste quand le composant va s'afficher
+   */
+
+  useEffect(() => {
+    axios
+      .get("https://localhost:8000/api/customers")
+      .then((response) => response.data["hydra:member"])
+
+      // Une fois que l'on récupère le tableau data ,
+      // changer ce qu'il y a  dans le state customer ave ce que ce l'on récupère ,
+
+      .then((data) => setCustomers(data))
+      // Récupération de l'erreur si elle existe
+      .catch((error) => console.log(error.response));
+  }, []);
+
+  const handleDelete = (id) => {
+    // Copie du tableau des customers
+    const originalCustomers = [...customers];
+
+    // Supprimer visuellement
+    setCustomers(customers.filter((customer) => customer.id !== id));
+
+    axios
+      .delete(`https://localhost:8000/api/customers/${id}`)
+      // Lorsque la suppression est faite alors supprimer de
+      .then((response) => console.log("ok"))
+      .catch((error) => {
+        // Remettre la liste des customers avant suppression si celle ci a échouée
+        setCustomers(originalCustomers);
+        console.log(error.response);
+      });
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+  // Pagination
+  const itemsPerPage = 10;
+
+  const paginatedCustomers = Pagination.getData(
+    customers,
+
+    currentPage,
+    // Définit comme une constante un peu plus haut
+    itemsPerPage
+  );
+  return (
+    <>
+      <h1>Liste des clients</h1>
+      <table className="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Email</th>
+            <th>Entreprise</th>
+            <th className="text-center">Factures</th>
+            <th className="text-center">Montant total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedCustomers.map((customer) => (
+            <tr key={customer.id}>
+              <td>{customer.id}</td>
+              <td>
+                <a href="#">
+                  {customer.firstName} {customer.lastName}
+                </a>
+              </td>
+              <td>{customer.email}</td>
+              <td>{customer.compagny}</td>
+              <td className="text-center">
+                {customer.totalAmount.toLocaleString()} €
+              </td>
+              <td>
+                <button
+                  // Si on clique sur le bouton, lancer la function fléchée handleDelete avec comme param customer.id
+                  onClick={() => {
+                    handleDelete(customer.id);
+                  }}
+                  // Désactiver le bouton si l'on a des factures ( on ne veut pas d'orphelin )
+                  disabled={customer.invoices.length > 0}
+                  className="btn btn-sm btn-danger"
+                >
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Pagination
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        length={customers.length}
+        onPageChanged={handlePageChange}
+      />
+    </>
+  );
+};
+
+export default CustomersPage;
+```
+
+## Paginer les données grâce à ApiPlatform
+
+```jsx
+import React, { useEffect, useState } from "react";
+// Permet de faire des requêtes http
+import axios from "axios";
+import Pagination from "../components/Pagination";
+
+const CustomersPageWithPagination = (props) => {
+  /**
+   * Le state se définit par customers avec sa méthode
+   * setCustomer qui permet de modifier la variable customers
+   */
+  const [customers, setCustomers] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  // currentPage est un stage dont la page par défaut est définit à 1
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  // Pagination
+  const itemsPerPage = 10;
+  /**
+   * Créatioin de l'effet, le deuxième paramètre [] contient la variable à surveiller
+   * pour lancer une effect à chaque fois qu'une variable change.
+   * Dans notre cas la fonction useEffect s'execute à chaque fois que la variable
+   * currentPage change
+   */
+
+  useEffect(() => {
+    axios
+      // Activer la pagination dans la requête
+      .get(
+        `https://localhost:8000/api/customers?pagination=true&count=${itemsPerPage}&page=${currentPage}`
+      )
+      .then((response) => {
+        setCustomers(response.data["hydra:member"]);
+        setTotalItems(response.data["hydra:totalItems"]);
+        setLoading(false);
+      })
+
+      // Récupération de l'erreur si elle existe
+      .catch((error) => console.log(error.response));
+  }, [currentPage]);
+
+  const handleDelete = (id) => {
+    // Copie du tableau des customers
+    const originalCustomers = [...customers];
+
+    // Supprimer visuellement
+    setCustomers(customers.filter((customer) => customer.id !== id));
+
+    axios
+      .delete(`https://localhost:8000/api/customers/${id}`)
+      // Lorsque la suppression est faite alors supprimer de
+      //   .then((response) => console.log("ok"))
+      .catch((error) => {
+        // Remettre la liste des customers avant suppression si celle ci a échouée
+        setCustomers(originalCustomers);
+        console.log(error.response);
+      });
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    setLoading(true);
+  };
+
+  const paginatedCustomers = Pagination.getData(
+    customers,
+    currentPage,
+    // Définit comme une constante un peu plus haut
+    itemsPerPage
+  );
+
+  return (
+    <>
+      <h1>Liste des clients (Pagination)</h1>
+      <table className="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Email</th>
+            <th>Entreprise</th>
+            <th className="text-center">Factures</th>
+            <th className="text-center">Montant total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Si loading true alors afficher le chargement */}
+          {loading && (
+            <tr>
+              <td>Chargement en cours</td>
+            </tr>
+          )}
+          {!loading &&
+            customers.map((customer) => (
+              <tr key={customer.id}>
+                <td>{customer.id}</td>
+                <td>
+                  <a href="#">
+                    {customer.firstName} {customer.lastName}
+                  </a>
+                </td>
+                <td>{customer.email}</td>
+                <td>{customer.compagny}</td>
+                <td className="text-center">
+                  {customer.totalAmount.toLocaleString()} €
+                </td>
+                <td>
+                  <button
+                    // Si on clique sur le bouton, lancer la function fléchée handleDelete avec comme param customer.id
+                    onClick={() => {
+                      handleDelete(customer.id);
+                    }}
+                    // Désactiver le bouton si l'on a des factures ( on ne veut pas d'orphelin )
+                    disabled={customer.invoices.length > 0}
+                    className="btn btn-sm btn-danger"
+                  >
+                    Supprimer
+                  </button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+      <Pagination
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        length={totalItems}
+        onPageChanged={handlePageChange}
+      />
+    </>
+  );
+};
+
+export default CustomersPageWithPagination;
 ```
