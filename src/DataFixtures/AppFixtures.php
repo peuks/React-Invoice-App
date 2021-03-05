@@ -25,7 +25,7 @@ class AppFixtures extends Fixture
         /**
          * Création des Users
          */
-        for ($i = 0; $i < mt_rand(20, 20); $i++) {
+        for ($i = 0; $i < mt_rand(20, 50); $i++) {
             /** @var User */
             $user = new User();
             $user->setFirstName($this->faker->firstName)

@@ -57,16 +57,29 @@ const CustomersPage = (props) => {
     setCurrentPage(page);
   };
 
+  const handleHandleSearch = (event) => {
+    const value = event.currentTarget.value;
+  };
+
   const handleSearch = (event) => {
     const value = event.currentTarget.value;
     setSearch(value);
+    setCurrentPage(1);
   };
+
+  const filteredCustomers = customers.filter(
+    (c) =>
+      c.firstName.toLowerCase().includes(search.toLowerCase()) ||
+      c.lastName.toLowerCase().includes(search.toLowerCase()) ||
+      c.email.toLowerCase().includes(search.toLowerCase()) ||
+      c.company != null && c.company.toLowerCase().includes(search.toLowerCase())
+  );
 
   // Pagination
   const itemsPerPage = 10;
 
   const paginatedCustomers = Pagination.getData(
-    customers,
+    filteredCustomers,
 
     currentPage,
     // Définit comme une constante un peu plus haut
@@ -107,7 +120,7 @@ const CustomersPage = (props) => {
                 </a>
               </td>
               <td>{customer.email}</td>
-              <td>{customer.compagny}</td>
+              <td>{customer.company}</td>
               <td className="text-center">
                 {customer.totalAmount.toLocaleString()} €
               </td>
@@ -128,12 +141,14 @@ const CustomersPage = (props) => {
           ))}
         </tbody>
       </table>
-      <Pagination
-        currentPage={currentPage}
-        itemsPerPage={itemsPerPage}
-        length={customers.length}
-        onPageChanged={handlePageChange}
-      />
+      {itemsPerPage < filteredCustomers.length && (
+        <Pagination
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          length={filteredCustomers.length}
+          onPageChanged={handlePageChange}
+        />
+      )}
     </>
   );
 };
