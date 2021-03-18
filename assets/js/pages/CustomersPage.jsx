@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 // Permet de faire des requêtes http
 import axios from "axios";
 import Pagination from "../components/Pagination";
-
+import CustomersAPI from "../services/customersAPI";
+import customersAPI from "../services/customersAPI";
 const CustomersPage = (props) => {
   /**
    * Le state se définit par customers avec sa méthode
@@ -23,13 +24,9 @@ const CustomersPage = (props) => {
    */
 
   useEffect(() => {
-    axios
-      .get("https://localhost:8000/api/customers")
-      .then((response) => response.data["hydra:member"])
-
-      // Une fois que l'on récupère le tableau data ,
-      // changer ce qu'il y a  dans le state customer ave ce que ce l'on récupère ,
-
+    // Une fois que l'on récupère le tableau data ,
+    // changer ce qu'il y a  dans le state customer ave ce que ce l'on récupère ,
+    CustomersAPI.findAll()
       .then((data) => setCustomers(data))
       // Récupération de l'erreur si elle existe
       .catch((error) => console.log(error.response));
@@ -42,8 +39,8 @@ const CustomersPage = (props) => {
     // Supprimer visuellement
     setCustomers(customers.filter((customer) => customer.id !== id));
 
-    axios
-      .delete(`https://localhost:8000/api/customers/${id}`)
+    customersAPI
+      .delete(id)
       // Lorsque la suppression est faite alors supprimer de
       .then((response) => console.log("ok"))
       .catch((error) => {
@@ -72,7 +69,8 @@ const CustomersPage = (props) => {
       c.firstName.toLowerCase().includes(search.toLowerCase()) ||
       c.lastName.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase()) ||
-      c.company != null && c.company.toLowerCase().includes(search.toLowerCase())
+      (c.company != null &&
+        c.company.toLowerCase().includes(search.toLowerCase()))
   );
 
   // Pagination
