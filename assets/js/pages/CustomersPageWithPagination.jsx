@@ -27,7 +27,7 @@ const CustomersPageWithPagination = (props) => {
     axios
       // Activer la pagination dans la requête
       .get(
-        `https://localhost:8000/api/customers?pagination=true&count=${itemsPerPage}&page=${currentPage}`
+        `https://localhost:8001/api/customers?pagination=true&count=${itemsPerPage}&page=${currentPage}`
       )
       .then((response) => {
         setCustomers(response.data["hydra:member"]);
@@ -47,7 +47,7 @@ const CustomersPageWithPagination = (props) => {
     setCustomers(customers.filter((customer) => customer.id !== id));
 
     axios
-      .delete(`https://localhost:8000/api/customers/${id}`)
+      .delete(`https://localhost:8001/api/customers/${id}`)
       // Lorsque la suppression est faite alors supprimer de
       //   .then((response) => console.log("ok"))
       .catch((error) => {
