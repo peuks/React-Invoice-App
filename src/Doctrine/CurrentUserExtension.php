@@ -16,7 +16,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryCollectionExtensionInter
  * Permet de définir un utilisateur à une requête pour la liste des Invoices ou des Customers
  * Dans un cas un utilisateur est directement accessible ( un Customer a un user)
  * Dans l'autre cas, on utilise un join ( une invoice a un customer qui a un user)
- * 
+ *
  * On prend en compte aussi le rôle admin pour pouvoir tout afficher.
  */
 class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
@@ -39,12 +39,13 @@ class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryIt
      * Si l'on demande des invoices ou des customers alors agir sur la requête pour qu'elle tienne compte de l'utilisateur
      * Est ce que la ressource class ( la class qui nous intéresse c'est des invoices ou des customers)
      * cela revient à faire SELECT o from \App\Entity\Invoice AS o.
-     * 
+     *
      * A cela on veut rajouter quelque chose du genre WHERE o.user = :user
-     * 
+     *
      */
     private function addWhere(QueryBuilder $queryBuilder, string $resourceClass)
     {
+        dd($test);
         // Obtenir l'utilisateur connecté
         $user =  $this->security->getUser();
 
@@ -59,10 +60,10 @@ class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryIt
 
             /**
              *  Récupérer les listes des alias et selectionner que le premier
-             * 
+             *
              *  Si on récupère Customer et Invoice alors ils seront accessible sous forme d'alias
-             *  
-             *  eg: La lettre o pour les invoices  et ou p pour les Customers  
+             *
+             *  eg: La lettre o pour les invoices  et ou p pour les Customers
              *  @return Array
              */
             $rootAlias = $queryBuilder->getRootAliases()[0];
@@ -77,7 +78,7 @@ class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryIt
 
                 case Invoice::class:
 
-                    // Invoice n'est pas ratachée directement à user mais a customer ! 
+                    // Invoice n'est pas ratachée directement à user mais a customer !
                     // Il faut d'abord faire une jointure sur Customer pour avoir accès au user
                     // Un $rootAlias.customer est accessible via l'alias "c"
 

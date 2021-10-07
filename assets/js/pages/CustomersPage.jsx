@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Pagination from "../components/Pagination";
 import CustomersAPI from "../services/customersAPI";
-import customersAPI from "../services/customersAPI";
 const CustomersPage = (props) => {
   /**
    * Le state se définit par customers avec sa méthode

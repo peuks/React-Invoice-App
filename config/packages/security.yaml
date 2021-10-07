@@ -15,17 +15,22 @@ security:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
 
+    # Registration and login are open to allowed registration and login
     registration:
-      pattern: ^/api/login
+      pattern: ^/api/users
       stateless: true
       anonymous: true
+      # Allow only POST method to avoid the avaibility to get all users
       methods: [POST]
 
     login:
       pattern: ^/api/login
       stateless: true
-      anonymous: true
+      anonymous: false
+      methods: [POST]
+
       json_login:
+        username_path: email
         check_path: /api/login_check
         success_handler: lexik_jwt_authentication.handler.authentication_success
         failure_handler: lexik_jwt_authentication.handler.authentication_failure
@@ -36,33 +41,41 @@ security:
       guard:
         authenticators:
           - lexik_jwt_authentication.jwt_token_authenticator
-
-      # Option a configurer avec access_contro !!! Aucune sécurité n'est active dans le cas contraire
+      # Parce que anonymous est activé, il faut resécuriser tous les accès avec l'option access_control
       anonymous: true
+
+    contract:
+      pattern: ^/contract
+      stateless: true
+      guard:
+        authenticators:
+          - lexik_jwt_authentication.jwt_token_authenticator
+      # Parce que anonymous est activé, il faut resécuriser tous les accès avec l'option access_control
+      anonymous: false
+
+    signature:
+      pattern: ^/signature
+      stateless: true
+      guard:
+        authenticators:
+          - lexik_jwt_authentication.jwt_token_authenticator
+      # Parce que anonymous est activé, il faut resécuriser tous les accès avec l'option access_control
+      anonymous: false
 
     main:
       anonymous: true
       lazy: true
       provider: app_user_provider
-
       # activate different ways to authenticate
       # https://symfony.com/doc/current/security.html#firewalls-authentication
       # https://symfony.com/doc/current/security/impersonating_user.html
       # switch_user: true
-
-  # Easy way to control access for large sections of your site
-  # Note: Only the *first* access control that matches will be used
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
   access_control:
     - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-    - { path: ^/api/customers, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-    - { path: ^/api/invoices, roles: IS_AUTHENTICATED_FULLY }
-    - {
-        path: ^/api/users,
-        roles: IS_AUTHENTICATED_FULLY,
-        # POST n'est pas utile une fois connecté, on ne veut laisser la possibiliter de créer un compte si l'on est connecté
-        methods: ["GET", PUT, DELETE],
-      }
-    - { path: ^/api/customers, roles: IS_AUTHENTICATED_FULLY }
-    # - { path: ^/admin, roles: ROLE_ADMIN }
-    # - { path: ^/admin, roles: ROLE_ADMIN }
-    # - { path: ^/profile, roles: ROLE_USER }
+    - { path: ^/api/folders, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/api/properties, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/contract, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/signature, roles: IS_AUTHENTICATED_FULLY }

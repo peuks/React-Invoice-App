@@ -1,9 +1,9 @@
 import axios from "axios";
 
 function findAll() {
-  return axios
-    .get("https://localhost:8000/api/customers")
-    .then((response) => response.data["hydra:member"]);
+  return axios.get("SuperbeUrl de la mort").then((response) => {
+    console.log("Afficher la Response" + response);
+  });
 }
 
 function deleteCustomer(id) {
